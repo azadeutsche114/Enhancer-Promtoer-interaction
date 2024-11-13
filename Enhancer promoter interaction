@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Conv1D, Bidirectional, GRU, Dense, Input, At
 from tensorflow.keras.models import Model
 
 # Define the DNA sequence input for both enhancer and promoter
-seq_length = 1000  # Adjust based on your sequence length
+seq_length = 1000  
 input_enhancer = Input(shape=(seq_length, 4), name="Enhancer_Input")
 input_promoter = Input(shape=(seq_length, 4), name="Promoter_Input")
 
@@ -11,7 +11,7 @@ input_promoter = Input(shape=(seq_length, 4), name="Promoter_Input")
 def cnn_gru_block(input_seq):
     x = Conv1D(filters=32, kernel_size=5, activation="relu", padding="same")(input_seq)
     x = Bidirectional(GRU(32, return_sequences=True))(x)
-    x = Attention()([x, x])  # Attention layer to focus on important features
+    x = Attention()([x, x])  
     x = GlobalMaxPooling1D()(x)  # Pooling to get a fixed-size output
     return x
 
@@ -22,7 +22,7 @@ promoter_features = cnn_gru_block(input_promoter)
 # Concatenate features and add dense layers for interaction prediction
 combined_features = Concatenate()([enhancer_features, promoter_features])
 x = Dense(64, activation="relu")(combined_features)
-output = Dense(1, activation="sigmoid")(x)  # Binary classification output
+output = Dense(1, activation="sigmoid")(x)  
 
 # Define and compile the model
 model = Model(inputs=[input_enhancer, input_promoter], outputs=output)
