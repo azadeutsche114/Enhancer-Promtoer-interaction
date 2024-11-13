@@ -1,0 +1,58 @@
+import tensorflow as tf
+from tensorflow.keras.layers import Conv1D, Bidirectional, GRU, Dense, Input, Attention, GlobalMaxPooling1D, Concatenate
+from tensorflow.keras.models import Model
+
+# Define the DNA sequence input for both enhancer and promoter
+seq_length = 1000  # Adjust based on your sequence length
+input_enhancer = Input(shape=(seq_length, 4), name="Enhancer_Input")
+input_promoter = Input(shape=(seq_length, 4), name="Promoter_Input")
+
+# Function to create a CNN + GRU model for sequence feature extraction
+def cnn_gru_block(input_seq):
+    x = Conv1D(filters=32, kernel_size=5, activation="relu", padding="same")(input_seq)
+    x = Bidirectional(GRU(32, return_sequences=True))(x)
+    x = Attention()([x, x])  # Attention layer to focus on important features
+    x = GlobalMaxPooling1D()(x)  # Pooling to get a fixed-size output
+    return x
+
+# Apply CNN-GRU block to both enhancer and promoter sequences
+enhancer_features = cnn_gru_block(input_enhancer)
+promoter_features = cnn_gru_block(input_promoter)
+
+# Concatenate features and add dense layers for interaction prediction
+combined_features = Concatenate()([enhancer_features, promoter_features])
+x = Dense(64, activation="relu")(combined_features)
+output = Dense(1, activation="sigmoid")(x)  # Binary classification output
+
+# Define and compile the model
+model = Model(inputs=[input_enhancer, input_promoter], outputs=output)
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+
+# Summary of the model
+model.summary()
+
+
+import numpy as np
+
+# one-hot encode DNA sequences
+def one_hot_encode_sequence(sequence, seq_length):
+    mapping = {'A': [1, 0, 0, 0], 'T': [0, 1, 0, 0], 'C': [0, 0, 1, 0], 'G': [0, 0, 0, 1]}
+    encoded_seq = np.array([mapping[base] for base in sequence.upper() if base in mapping])
+    if len(encoded_seq) < seq_length:
+        padding = np.zeros((seq_length - len(encoded_seq), 4))
+        encoded_seq = np.vstack((encoded_seq, padding))
+    return encoded_seq[:seq_length]
+
+# Example usage
+enhancer_sequences = ["ACTG..."]  # Replace with actual DNA sequences
+promoter_sequences = ["TGCA..."]  # Replace with actual DNA sequences
+
+# Encoding sequences
+X_enhancer = np.array([one_hot_encode_sequence(seq, seq_length) for seq in enhancer_sequences])
+X_promoter = np.array([one_hot_encode_sequence(seq, seq_length) for seq in promoter_sequences])
+
+# Binary labels indicating interaction (1) or non-interaction (0)
+y = np.array([1, 0, ...])  # Replace with actual labels
+
+# Train the model
+model.fit([X_enhancer, X_promoter], y, epochs=10, batch_size=32, validation_split=0.2)
