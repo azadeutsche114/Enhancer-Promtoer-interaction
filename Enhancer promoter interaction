@@ -56,3 +56,74 @@ y = np.array([1, 0, ...])  # Replace with actual labels
 
 # Train the model
 model.fit([X_enhancer, X_promoter], y, epochs=10, batch_size=32, validation_split=0.2)
+
+
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.cluster import KMeans
+
+
+# Load data 
+
+import pandas as pd
+
+url = 'https://apollo.com/DATA/data.csv'
+df = pd.read_csv(url)
+print(df.head())
+
+X = data.data
+y = data.enhancer
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Initialize and train Random Forest
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_rf = rf.predict(X_test)
+print("Random Forest Accuracy:", accuracy_score(y_test, y_pred_rf))
+
+
+# Initialize and train KNN
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_knn = knn.predict(X_test)
+print("KNN Accuracy:", accuracy_score(y_test, y_pred_knn))
+
+# Initialize and train SVM
+svm = SVC(kernel='linear')
+svm.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_svm = svm.predict(X_test)
+print("SVM Accuracy:", accuracy_score(y_test, y_pred_svm))
+
+# Initialize and train Logistic Regression
+log_reg = LogisticRegression(max_iter=200)
+log_reg.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_log_reg = log_reg.predict(X_test)
+print("Logistic Regression Accuracy:", accuracy_score(y_test, y_pred_log_reg))
+
+# Initialize and train KMeans
+kmeans = KMeans(n_clusters=3, random_state=42)
+clusters = kmeans.fit_predict(X)
+
+# Display clusters
+print("Cluster assignments:", clusters)
+
+print("Random Forest Classification Report:\n", classification_report(y_test, y_pred_rf))
+print("KNN Classification Report:\n", classification_report(y_test, y_pred_knn))
+print("SVM Classification Report:\n", classification_report(y_test, y_pred_svm))
+print("Logistic Regression Classification Report:\n", classification_report(y_test, y_pred_log_reg))
